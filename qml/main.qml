@@ -23,6 +23,7 @@ ApplicationWindow {
         accentColor: Palette.colors["teal"]["500"]
         tabHighlightColor: "white"
     }
+
     clientSideDecorations: false
     width: Units.dp(1000)
     height: Units.dp(750)

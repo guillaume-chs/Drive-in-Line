@@ -22,6 +22,7 @@ Item {
     property int itemWidth: 200
     property int itemHeight: 40
     property int itemMargin: 20
+    property int textMargin: 15
     property int colSpacing: 25
     property int rowSpacing: 10
     property int itemsPerLine: nbItemsPerLine()
@@ -35,7 +36,11 @@ Item {
 
         property int maxTextLength: calculateMaxLength(fontSize)
         function calculateMaxLength(pixelSize) {
-            return Math.round((columnLayout.width - Units.dp(itemMargin)) / (Units.dp(pixelSize) * 2), 0);
+            var marginItem = (Units.dp(itemMargin) * 2);
+            var marginText = (Units.dp(textMargin) * 2);
+            var total_width = columnLayout.width - marginItem - marginText;
+
+            return Math.round(total_width / (Units.dp(pixelSize)), 0);
         }
 
         onWidthChanged: {
@@ -88,7 +93,7 @@ Item {
                             anchors {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter
-                                margins: Units.dp(15)
+                                margins: Units.dp(textMargin)
                             }
                         }
 
@@ -315,7 +320,7 @@ Item {
         }
     }
 
-    GoogleDriveLoader {
+    GDriveLoader {
         id: gdriveLoader
         visible: !(home.on)
         property string message: "Retreiving data from Google Drive ..."
