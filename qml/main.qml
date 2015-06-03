@@ -6,8 +6,8 @@ import Material.ListItems 0.1 as ListItem
 import io.thp.pyotherside 1.4
 
 ApplicationWindow {
-    id: firstApplication
-    title: "Prise en main du framework QML Material design"
+    id: driveInLine
+    title: "Drive-in-Line : a Google Drive client for Linux"
 
     property var myDriveMenu: [ "Home", "Recent files", "Trash" ]
     property var historyMenu: [ "All history", "New files", "Updated files", "Deleted files" ]
@@ -70,9 +70,9 @@ ApplicationWindow {
                                 model: modelData
                                 delegate: ListItem.Standard {
                                     text: modelData
-                                    selected: modelData === firstApplication.selectedComponent
+                                    selected: modelData === driveInLine.selectedComponent
                                     onClicked: {
-                                        firstApplication.selectedComponent = modelData
+                                        driveInLine.selectedComponent = modelData
                                         navDrawer.close()
                                     }
                                 }
@@ -110,7 +110,7 @@ ApplicationWindow {
                                 text: modelData
                                 selected: modelData === panel.selectedComponent
                                 onClicked: {
-                                    firstApplication.selectedComponent = modelData;
+                                    driveInLine.selectedComponent = modelData;
                                     panel.selectedComponent = modelData;
                                 }
                             }
@@ -133,7 +133,7 @@ ApplicationWindow {
                         id: myLoader
                         toLoad: {
                             if (navDrawer.enabled) {
-                                return firstApplication.selectedComponent;
+                                return driveInLine.selectedComponent;
                             } else {
                                 return panel.selectedComponent;
                             }

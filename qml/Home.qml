@@ -33,7 +33,10 @@ Item {
         spacing: Units.dp(colSpacing)
         visible: true
 
-        property int maxTextLength: Math.round((columnLayout.width - Units.dp(itemMargin)) / (Units.dp(fontSize) * 2), 0)
+        property int maxTextLength: calculateMaxLength(fontSize)
+        function calculateMaxLength(pixelSize) {
+            return Math.round((columnLayout.width - Units.dp(itemMargin)) / (Units.dp(pixelSize) * 2), 0);
+        }
 
         onWidthChanged: {
             requestDraw();
@@ -62,6 +65,14 @@ Item {
                         width: Math.max(Units.dp(itemWidth), ((columnLayout.width - (rowSpacing * 2)) / itemsPerLine))
                         height: Units.dp(itemHeight)
                         anchors.margins: Units.dp(itemMargin)
+                        elevation: (isFolder ? 1 : 0)
+                        enabled: true
+                        flat: true
+                        backgroundColor: (isFolder ? folder_bg_color : file_bg_color)
+
+                        property var folder_bg_color: "white"
+                        property var file_bg_color: Qt.rgba(0, 0, 0, 0.1)
+                        property var hover_bg_color: Palette.colors["teal"]["200"]
 
                         property bool isFolder: gdrive.isFolder(modelData)
 
@@ -70,33 +81,26 @@ Item {
                             style: "title"
                             font.weight: Font.Normal
                             font.pixelSize: Units.dp(home.fontSize)
-                            text: concatenateText()
 
-                            onFontChanged: {
-                                console.log('pixel size : ' + font.pixelSize);
-                            }
+                            property string textToPrint: concatenateText(columnLayout.maxTextLength)
+                            text: textToPrint
 
                             anchors {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter
                                 margins: Units.dp(15)
                             }
-
-                            function concatenateText() {
-                                var base = modelData["title"].toString();
-                                var ellipsis = "…";
-                                var maxLength = columnLayout.maxTextLength;
-
-                                if (base.length > maxLength) {
-                                    base = base.slice(0, maxLength - ellipsis.length) + ellipsis;
-                                }
-
-                                return base;
-                            }
                         }
 
-                        enabled: true
-                        elevation: (isFolder ? 1 : 0)
+                        function concatenateText(maxLength) {
+                            var base = modelData["title"].toString();
+                            var ellipsis = "…";
+
+                            if (base.length > maxLength) {
+                                base = base.slice(0, maxLength - ellipsis.length) + ellipsis;
+                            }
+                            return base;
+                        }
 
                         MouseArea {
                             id: mouseArea
@@ -113,40 +117,69 @@ Item {
                                 }
                             }
 
+                            onEntered: { state = "hovered"; }
+                            onExited:  { state = "normal";  }
+
                             states: [
                                 State {
                                     name: "hovered"
                                     PropertyChanges {
                                         target: cardLabel
-                                        font.pixelSize: Units.dp(Math.max((width / text.length), 14));
+                                        font.pixelSize: {
+                                            if (text.length >= columnLayout.maxTextLength) {
+                                                return Units.dp(14);
+                                            } else {
+                                                return Units.dp(home.fontSize);
+                                            }
+                                        }
+                                        text: {
+                                            var base = modelData["title"].toString();
+                                            var newFontSize = 14;
+
+                                            var overflow = base.length - columnLayout.maxTextLength;
+                                            if (overflow >= 8) {
+                                                newFontSize = 12;
+                                            } else if (overflow >= 4) {
+                                                newFontSize = 13;
+                                            }
+
+                                            var newMaxLength = columnLayout.calculateMaxLength(newFontSize);
+                                            return card.concatenateText(newMaxLength);
+                                        }
+                                    }
+                                    PropertyChanges {
+                                        target: card
+                                        backgroundColor: hover_bg_color
                                     }
                                 },
+
                                 State {
                                     name: "normal"
                                     PropertyChanges {
                                         target: cardLabel
                                         font.pixelSize: Units.dp(home.fontSize);
+                                        text: textToPrint
+                                    }
+                                    PropertyChanges {
+                                        target: card
+                                        backgroundColor: {
+                                            if (isFolder) {
+                                                return folder_bg_color;
+                                            } else {
+                                                return file_bg_color;
+                                            }
+                                        }
                                     }
                                 }
                             ]
 
                             transitions: [
                                 Transition {
-                                    NumberAnimation {
-                                        target: cardLabel; property: "font.pixelSize"; duration: 300; easing.type: Easing.InOutQuad
-                                    }
+                                    NumberAnimation   { target: cardLabel; property: "font.pixelSize";  duration: 200 }
+                                    PropertyAnimation { target: cardLabel; property: "text";            duration: 200 }
+                                    ColorAnimation    { target: card;                                   duration: 200 }
                                 }
                             ]
-
-                            onEntered: {
-                                console.log('entered');
-                                state = "hovered";
-                            }
-
-                            onExited: {
-                                console.log('exited');
-                                state = "normal";
-                            }
                         }
                     }
                 }
@@ -224,7 +257,7 @@ Item {
 
     BottomActionSheet {
         id: actionSheet
-        maxHeight: (firstApplication.height / 2)
+        maxHeight: (driveInLine.height / 2)
         property string base_title: "What to do with "
         actions: [
             Action {
