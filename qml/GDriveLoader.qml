@@ -69,13 +69,7 @@ Rectangle {
         anchors.centerIn: parent
 
         hoverEnabled: true
-        onEntered: {
-            console.log('mouseEntered');
-            progressCircle.state = "hovered";
-        }
-        onExited: {
-            console.log('mouseExited');
-            progressCircle.state = "normal";
-        }
+        onEntered: { progressCircle.state = "hovered" }
+        onExited:  { progressCircle.state = "normal" }
     }
 }
