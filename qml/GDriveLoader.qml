@@ -20,24 +20,30 @@ Rectangle {
 
     ProgressCircle {
         id: progressCircle
-        anchors.centerIn: parent
         width: ((parent.width / 6) * 1)
         height: ((parent.height / 6) * 1)
-        dashThickness: Units.dp(7)
+        anchors.centerIn: parent
+
+        dashThickness: normal_thickness
         visible: !(parent.on)
+        color: normal_color
 
-        color: Palette.colors["orange"]["500"]
+        property var normal_thickness: Units.dp(7)
+        property var normal_color: Palette.colors["orange"]["500"]
 
-        MouseArea {
-            id: mouseArea
-            hoverEnabled: true
-            anchors.fill: parent
-        }
+        property var hovered_thickness: Units.dp(12)
+        property var hovered_color: Palette.colors["orange"]["900"]
 
-        states: State {
-            name: "hovered"; when: mouseArea.pressed
-            PropertyChanges { target: progressCircle; color: Palette.colors["orange"]["900"]; dashThickness: Units.dp(12) }
-        }
+        states: [
+            State {
+                name: "hovered"
+                PropertyChanges { target: progressCircle; color: hovered_color; dashThickness: hovered_thickness }
+            },
+            State {
+                name: "normal"
+                PropertyChanges { target: progressCircle; color: normal_color; dashThickness:  normal_thickness }
+            }
+        ]
 
         transitions: Transition {
             PropertyAnimation { property: "dashThickness"; easing.type: Easing.InOutQuad }
@@ -53,6 +59,23 @@ Rectangle {
             } else {
                 snackbar.opened = true;
             }
+        }
+    }
+
+    MouseArea {
+        id: mouseArea
+        width: parent.width / 1.66
+        height: parent.height / 1.66
+        anchors.centerIn: parent
+
+        hoverEnabled: true
+        onEntered: {
+            console.log('mouseEntered');
+            progressCircle.state = "hovered";
+        }
+        onExited: {
+            console.log('mouseExited');
+            progressCircle.state = "normal";
         }
     }
 }

@@ -3,8 +3,8 @@ QT += qml quick
 
 DISTFILES += \
     qml/Allhistory.qml \
-    qml/GDriveClient.qml \
-    qml/GoogleDriveLoader.qml \
     qml/Home.qml \
     qml/main.qml \
-    qml/MyLoader.qml
+    qml/MyLoader.qml \
+    qml/GDriveClient.qml \
+    qml/GDriveLoader.qml

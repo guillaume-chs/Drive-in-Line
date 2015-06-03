@@ -27,13 +27,13 @@ Item {
     function setClient(new_client) {
         gdrive.client = new_client;
         gdrive.authenticate();
-        gDriveInitialized();
     }
 
     function authenticate(callback) {
         console.log('py.call : ' + gdrive.client + '.connect');
         py.call(gdrive.client + '.connect', [], function(result) {
             isConnected = true;
+            gDriveInitialized();
             if (callback !== undefined) {
                 callback(result);
             }
