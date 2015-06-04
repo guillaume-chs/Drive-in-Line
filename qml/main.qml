@@ -61,7 +61,10 @@ ApplicationWindow {
                     Repeater {
                         model: sections
                         delegate: Column {
+                            id: sectionColumn
                             width: parent.width
+
+                            property int selectedTab: index
 
                             ListItem.Subheader {
                                 text: sectionTitles[index]
@@ -73,8 +76,9 @@ ApplicationWindow {
                                     text: modelData
                                     selected: modelData === driveInLine.selectedComponent
                                     onClicked: {
-                                        driveInLine.selectedComponent = modelData
-                                        navDrawer.close()
+                                        page.selectedTab = sectionColumn.selectedTab;
+                                        driveInLine.selectedComponent = modelData;
+                                        navDrawer.close();
                                     }
                                 }
                             }
@@ -96,6 +100,7 @@ ApplicationWindow {
                 height: tabView.height
                 clip: true
 
+                property int actualTab: index
                 property string selectedComponent: modelData[0]
 
                 Sidebar {
