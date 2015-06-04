@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.4
 import QtQuick.Dialogs 1.0
 import Material 0.1
 
@@ -21,8 +21,8 @@ Item {
     property int fontSize: 15
     property int itemWidth: 200
     property int itemHeight: 40
-    property int itemMargin: 20
-    property int textMargin: 15
+    property int cardMargin: 20
+    property int labelMargin: 15
     property int colSpacing: 25
     property int rowSpacing: 10
     property int itemsPerLine: nbItemsPerLine()
@@ -34,13 +34,17 @@ Item {
         spacing: Units.dp(colSpacing)
         visible: true
 
+        property var cardWidth: {
+            return Math.max(Units.dp(itemWidth), ((columnLayout.width - (rowSpacing * 2)) / itemsPerLine))
+        }
+
         property int maxTextLength: calculateMaxLength(fontSize)
         function calculateMaxLength(pixelSize) {
-            var marginItem = (Units.dp(itemMargin) * 2);
-            var marginText = (Units.dp(textMargin) * 2);
-            var total_width = columnLayout.width - marginItem - marginText;
+            var marginCard = (Units.dp(cardMargin) * 2);
+            var marginLabel = (Units.dp(labelMargin) * 2);
+            var total_width = cardWidth /*- marginCard - marginLabel*/;
 
-            return Math.round(total_width / (Units.dp(pixelSize)), 0);
+            return Math.round(total_width / (pixelSize / 2), 0);
         }
 
         onWidthChanged: {
@@ -67,9 +71,9 @@ Item {
 
                     delegate: Card {
                         id: card
-                        width: Math.max(Units.dp(itemWidth), ((columnLayout.width - (rowSpacing * 2)) / itemsPerLine))
+                        width: columnLayout.cardWidth
                         height: Units.dp(itemHeight)
-                        anchors.margins: Units.dp(itemMargin)
+                        anchors.margins: Units.dp(cardMargin)
                         elevation: (isFolder ? 1 : 0)
                         enabled: true
                         flat: true
@@ -87,18 +91,19 @@ Item {
                             font.weight: Font.Normal
                             font.pixelSize: Units.dp(home.fontSize)
 
-                            property string textToPrint: concatenateText(columnLayout.maxTextLength)
+                            property string fullText: modelData["title"].toString()
+                            property string textToPrint: shortenText(columnLayout.maxTextLength)
                             text: textToPrint
 
                             anchors {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter
-                                margins: Units.dp(textMargin)
+                                margins: Units.dp(labelMargin)
                             }
                         }
 
-                        function concatenateText(maxLength) {
-                            var base = modelData["title"].toString();
+                        function shortenText(maxLength) {
+                            var base = cardLabel.fullText;
                             var ellipsis = "…";
 
                             if (base.length > maxLength) {
@@ -131,25 +136,20 @@ Item {
                                     PropertyChanges {
                                         target: cardLabel
                                         font.pixelSize: {
-                                            if (text.length >= columnLayout.maxTextLength) {
-                                                return Units.dp(14);
+                                            if (fullText.length >= columnLayout.maxTextLength) {
+                                                return Units.dp(13);
                                             } else {
                                                 return Units.dp(home.fontSize);
                                             }
                                         }
                                         text: {
-                                            var base = modelData["title"].toString();
-                                            var newFontSize = 14;
-
-                                            var overflow = base.length - columnLayout.maxTextLength;
-                                            if (overflow >= 8) {
-                                                newFontSize = 12;
-                                            } else if (overflow >= 4) {
-                                                newFontSize = 13;
+                                            if (fullText.length >= columnLayout.maxTextLength) {
+                                                var newFontSize = 13;
+                                                var newMaxLength = columnLayout.calculateMaxLength(newFontSize);
+                                                return card.shortenText(newMaxLength);
+                                            } else {
+                                                return fullText;
                                             }
-
-                                            var newMaxLength = columnLayout.calculateMaxLength(newFontSize);
-                                            return card.concatenateText(newMaxLength);
                                         }
                                     }
                                     PropertyChanges {
@@ -288,13 +288,17 @@ Item {
                 iconName: "file/file_download"
                 name: "Download"
                 onTriggered: {
-                    fileDialog.open()
+                    fileDialog.open();
                 }
             },
             Action {
                 id: details
                 iconName: "action/settings"
                 name: "Details"
+                onTriggered: {
+                    gfileDialog.openForFile(home.actualFile);
+                }
+
                 hasDividerAfter: true
             },
             Action {
@@ -324,6 +328,11 @@ Item {
         id: gdriveLoader
         visible: !(home.on)
         property string message: "Retreiving data from Google Drive ..."
+    }
+
+    GFileDialog {
+        id: gfileDialog
+        // visible: false
     }
 
     Snackbar {
