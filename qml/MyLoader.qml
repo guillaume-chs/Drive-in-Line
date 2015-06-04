@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.4
 import Material 0.1
 
 Item {
@@ -19,9 +19,6 @@ Item {
             previous_src = source;
         }
         source = new_source;
-
-        console.log('new : ' + source);
-        console.log('previous : ' + previous_src);
     }
 
     Loader {
