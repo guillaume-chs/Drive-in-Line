@@ -1,5 +1,6 @@
 import QtQuick 2.4
 import QtQuick.Dialogs 1.0
+import QtGraphicalEffects 1.0
 import Material 0.1
 
 Item {
@@ -8,7 +9,7 @@ Item {
     property alias home_page: columnLayout
 
     property int homeMargins: 25
-    anchors.margins: Units.dp(home.homeMargins)
+    anchors.margins: Units.dp(homeMargins)
     anchors.fill: parent
 
     property var actualFile
@@ -27,6 +28,48 @@ Item {
     property int rowSpacing: 10
     property int itemsPerLine: nbItemsPerLine()
     property int numberOfRows: nbOfRows()
+
+    MouseArea {
+        anchors.fill: parent
+
+        RadialGradient {
+            id: gradient
+            visible: false
+            width: home.width + Units.dp(homeMargins)
+            height: home.height + Units.dp(homeMargins)
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "blue" }
+                GradientStop { position: 0.8; color: "lightblue" }
+            }
+        }
+
+        DropArea {
+            anchors.fill: parent
+            onContainsDragChanged: {
+                if (containsDrag) {
+                    gradient.visible = true;
+                } else {
+                    gradient.visible = false;
+                }
+            }
+
+            onDropped: {
+                console.log('dropped file(s)');
+
+                var filesUri = ',' + drop.urls.toString();
+                var filesUrl = filesUri.split(',file://');
+
+                snackbar.open("Uploading <b>" + (filesUrl.length >= 2 ? filesUrl[1] : "files") + "</b>");
+
+                for (var i = 1; i < filesUrl.length; i++) {
+                    var url = filesUrl[i];
+                    gdrive.uploadFile(url, function (result) {
+                        home.getActualDir();
+                    });
+                }
+            }
+        }
+    }
 
     Column {
         id: columnLayout
