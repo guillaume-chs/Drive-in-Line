@@ -45,6 +45,11 @@ Item {
         py.call(gdrive.client + '.list_dir_files', [directory], callback);
     }
 
+    function getTrashFiles(callback) {
+        console.log('py.call : ' + gdrive.client + '.list_trash_files');
+        py.call(gdrive.client + '.list_trash_files', [], callback);
+    }
+
     function renameFile(fileId, fileName, callback) {
         console.log('py.call : ' + gdrive.client + '.rename_file');
         py.call(gdrive.client + '.rename_file', [fileId, fileName], callback);
@@ -53,6 +58,16 @@ Item {
     function downloadFile(fileId, filePath, callback) {
         console.log('py.call : ' + gdrive.client + '.download_file');
         py.call(gdrive.client + '.download_file', [fileId, filePath], callback);
+    }
+
+    function uploadFile(filePath, callback) {
+        console.log('py.call : ' + gdrive.client + '.upload_file');
+        py.call(gdrive.client + '.upload_file', [filePath], callback);
+    }
+
+    function untrashFile(fileId, callback) {
+        console.log('py.call : ' + gdrive.client + '.untrash_file');
+        py.call(gdrive.client + '.untrash_file', [fileId], callback);
     }
 
     function openFile(fileId, callback) {

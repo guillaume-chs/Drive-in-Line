@@ -8,4 +8,5 @@ DISTFILES += \
     qml/MyLoader.qml \
     qml/GDriveClient.qml \
     qml/GDriveLoader.qml \
-    qml/GFileDialog.qml
+    qml/GFileDialog.qml \
+    qml/Trash.qml
